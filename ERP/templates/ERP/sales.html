@@ -1,0 +1,113 @@
+{% extends "ERP/base.html" %}
+{% block title %}Sales{% endblock %}
+{% block nav_title %}Sales{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Sales</h1>
+    <p class="page-sub">{{ sales|length }} transactions &nbsp;·&nbsp; Revenue: ₹{{ total_revenue|floatformat:0 }}</p>
+  </div>
+  <button class="btn-primary" onclick="openModal('addSaleModal')">+ Add Sale</button>
+</div>
+
+<div class="card">
+  {% if sales %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>#</th><th>Product</th><th>Customer</th><th>Qty</th>
+        <th>Unit Price</th><th>Total</th><th>Date</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sales %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><strong>{{ s.product_name }}</strong></td>
+        <td>{{ s.customer }}</td>
+        <td>{{ s.quantity }}</td>
+        <td>₹{{ s.unit_price|floatformat:2 }}</td>
+        <td class="text-success"><strong>₹{{ s.total|floatformat:0 }}</strong></td>
+        <td>{{ s.date }}</td>
+        <td>
+          <button
+            type="button"
+            class="btn-danger-sm"
+            onclick="deleteSale('{{ s.id }}', '{{ s.product_name }}')"
+          >Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-msg">No sales recorded yet.</p>
+  {% endif %}
+</div>
+
+<!-- HIDDEN DELETE FORM -->
+<form id="deleteForm" method="POST" style="display:none">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="delete"/>
+  <input type="hidden" name="sale_id" id="deleteSaleId"/>
+</form>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addSaleModal">
+  <div class="modal">
+    <h2 class="modal-title">Record Sale</h2>
+    <form method="POST" class="modal-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add"/>
+      <select class="modal-input" name="product_id" id="productSelect">
+        <option value="">-- Select Product --</option>
+        {% for item in items %}
+          <option value="{{ item.id }}" data-quantity="{{ item.quantity }}" data-price="{{ item.unit_price }}">
+            {{ item.name }} (Stock: {{ item.quantity }})
+          </option>
+        {% endfor %}
+        <option value="">-- Custom Product --</option>
+      </select>
+      <input class="modal-input" type="text" name="product_name" id="customProductName" placeholder="Product Name (if custom)"/>
+      <input class="modal-input" type="text" name="customer" placeholder="Customer Name" required/>
+      <input class="modal-input" type="number" name="quantity" id="saleQuantity" placeholder="Quantity" required/>
+      <input class="modal-input" type="number" step="0.01" name="unit_price" id="unitPrice" placeholder="Unit Price (₹)"/>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('addSaleModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Record Sale</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('productSelect').addEventListener('change', function() {
+  const selectedOption = this.options[this.selectedIndex];
+  const customName = document.getElementById('customProductName');
+  const unitPrice = document.getElementById('unitPrice');
+  const quantityInput = document.getElementById('saleQuantity');
+  
+  if (selectedOption.value) {
+    customName.value = '';
+    unitPrice.value = selectedOption.dataset.price;
+    quantityInput.max = selectedOption.dataset.quantity;
+    customName.required = false;
+    unitPrice.required = false;
+  } else if (selectedOption.text === '-- Custom Product --') {
+    customName.value = '';
+    unitPrice.value = '';
+    quantityInput.max = '';
+    customName.required = true;
+    unitPrice.required = true;
+  }
+});
+
+function deleteSale(id, name) {
+  if (confirm('Delete sale: ' + name + '?')) {
+    document.getElementById('deleteSaleId').value = id;
+    document.getElementById('deleteForm').submit();
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "ERP/base.html" %}
+{% block title %}Finance{% endblock %}
+{% block nav_title %}Finance{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Finance</h1>
+    <p class="page-sub">Track income and expenses</p>
+  </div>
+  <button class="btn-primary" onclick="openModal('addFinanceModal')">+ Add Record</button>
+</div>
+
+<!-- SUMMARY -->
+<div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+  <div class="kpi-card kpi-green">
+    <div class="kpi-icon">💹</div>
+    <div><p class="kpi-label">Total Income</p><p class="kpi-value">₹{{ total_income|floatformat:0 }}</p></div>
+  </div>
+  <div class="kpi-card kpi-red">
+    <div class="kpi-icon">📉</div>
+    <div><p class="kpi-label">Total Expense</p><p class="kpi-value">₹{{ total_expense|floatformat:0 }}</p></div>
+  </div>
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-icon">🏆</div>
+    <div><p class="kpi-label">Net Balance</p><p class="kpi-value">₹{{ net_balance|floatformat:0 }}</p></div>
+  </div>
+</div>
+
+<div class="card">
+  {% if records %}
+  <table class="data-table">
+    <thead>
+      <tr><th>#</th><th>Title</th><th>Type</th><th>Amount</th><th>Date</th><th>Notes</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><strong>{{ r.title }}</strong></td>
+        <td>
+          {% if r.type == 'income' %}
+            <span class="badge badge-green">Income</span>
+          {% else %}
+            <span class="badge badge-red">Expense</span>
+          {% endif %}
+        </td>
+        <td class="{% if r.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+          {% if r.type == 'income' %}+{% else %}-{% endif %}₹{{ r.amount|floatformat:0 }}
+        </td>
+        <td>{{ r.date }}</td>
+        <td>{{ r.notes|default:"—" }}</td>
+        <td>
+          <button type="button" class="btn-danger-sm"
+            onclick="deleteRecord('{{ r.id }}', '{{ r.title }}')">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-msg">No finance records yet.</p>
+  {% endif %}
+</div>
+
+<!-- HIDDEN DELETE FORM -->
+<form id="deleteRecordForm" method="POST" style="display:none">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="delete"/>
+  <input type="hidden" name="record_id" id="deleteRecordId"/>
+</form>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addFinanceModal">
+  <div class="modal">
+    <h2 class="modal-title">Add Finance Record</h2>
+    <form method="POST" class="modal-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add"/>
+      <input class="modal-input" type="text" name="title" placeholder="Title" required/>
+      <input class="modal-input" type="number" step="0.01" name="amount" placeholder="Amount (₹)" required/>
+      <select class="modal-input" name="type">
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+      <textarea class="modal-input" name="notes" placeholder="Notes (optional)" rows="3"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('addFinanceModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Add Record</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function deleteRecord(id, title) {
+  if (confirm('Delete record: ' + title + '?')) {
+    document.getElementById('deleteRecordId').value = id;
+    document.getElementById('deleteRecordForm').submit();
+  }
+}
+</script>
+{% endblock %}

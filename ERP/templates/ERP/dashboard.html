@@ -1,0 +1,84 @@
+{% extends "ERP/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block nav_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-sub">Welcome back, {{ request.user.username }} — here's your business overview</p>
+  </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="kpi-grid">
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-icon">👥</div>
+    <div>
+      <p class="kpi-label">Employees</p>
+      <p class="kpi-value">{{ stats.employees }}</p>
+    </div>
+  </div>
+  <div class="kpi-card kpi-purple">
+    <div class="kpi-icon">📦</div>
+    <div>
+      <p class="kpi-label">Inventory Items</p>
+      <p class="kpi-value">{{ stats.products }}</p>
+    </div>
+  </div>
+  <div class="kpi-card kpi-green">
+    <div class="kpi-icon">🛒</div>
+    <div>
+      <p class="kpi-label">Total Sales</p>
+      <p class="kpi-value">{{ stats.total_sales }}</p>
+    </div>
+  </div>
+  <div class="kpi-card kpi-orange">
+    <div class="kpi-icon">💰</div>
+    <div>
+      <p class="kpi-label">Net Profit</p>
+      <p class="kpi-value">₹{{ stats.net_profit|floatformat:0 }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM GRID -->
+<div class="section-grid">
+  <div class="card">
+    <h2 class="card-title">Recent Sales</h2>
+    {% if recent_sales %}
+    <table class="data-table">
+      <thead><tr><th>Product</th><th>Customer</th><th>Qty</th><th>Total</th></tr></thead>
+      <tbody>
+        {% for s in recent_sales %}
+        <tr>
+          <td>{{ s.product_name }}</td>
+          <td>{{ s.customer }}</td>
+          <td>{{ s.quantity }}</td>
+          <td class="text-success">₹{{ s.total|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty-msg">No sales recorded yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Finance Summary</h2>
+    <div class="finance-row income">
+      <span>💹 Total Income</span>
+      <strong>₹{{ stats.total_income|floatformat:0 }}</strong>
+    </div>
+    <div class="finance-row expense">
+      <span>📉 Total Expense</span>
+      <strong>₹{{ stats.total_expense|floatformat:0 }}</strong>
+    </div>
+    <div class="finance-row profit">
+      <span>🏆 Net Profit</span>
+      <strong>₹{{ stats.net_profit|floatformat:0 }}</strong>
+    </div>
+  </div>
+</div>
+{% endblock %}

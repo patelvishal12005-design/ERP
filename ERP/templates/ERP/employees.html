@@ -1,0 +1,113 @@
+{% extends "ERP/base.html" %}
+{% block title %}Employees{% endblock %}
+{% block nav_title %}Employees{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Employees</h1>
+    <p class="page-sub">{{ employees|length }} team members</p>
+  </div>
+  <button class="btn-primary" onclick="openModal('addEmpModal')">+ Add Employee</button>
+</div>
+
+<div class="card">
+  {% if employees %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>#</th><th>Name</th><th>Email</th><th>Role</th>
+        <th>Department</th><th>Salary</th><th>Joined</th><th>Today's Attendance</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in employees %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><strong>{{ emp.name }}</strong></td>
+        <td>{{ emp.email }}</td>
+        <td>{{ emp.role }}</td>
+        <td><span class="badge">{{ emp.department }}</span></td>
+        <td>₹{{ emp.salary|floatformat:0 }}</td>
+        <td>{{ emp.date_joined }}</td>
+        <td>
+          {% if emp.today_status %}
+            {% if emp.today_status == 'Present' %}
+              <span class="badge badge-green" onclick="markAttendance('{{ emp.id }}', 'Absent')" style="cursor:pointer" title="Click to change to Absent">Present</span>
+            {% elif emp.today_status == 'Absent' %}
+              <span class="badge badge-red" onclick="markAttendance('{{ emp.id }}', 'Leave')" style="cursor:pointer" title="Click to change to Leave">Absent</span>
+            {% else %}
+              <span class="badge" onclick="markAttendance('{{ emp.id }}', 'Present')" style="cursor:pointer" title="Click to change to Present">{{ emp.today_status }}</span>
+            {% endif %}
+          {% else %}
+            <button type="button" class="btn-secondary" style="padding:0.2rem 0.5rem; font-size:0.75rem;" onclick="markAttendance('{{ emp.id }}', 'Present')">P</button>
+            <button type="button" class="btn-danger-sm" style="padding:0.2rem 0.5rem; font-size:0.75rem;" onclick="markAttendance('{{ emp.id }}', 'Absent')">A</button>
+            <button type="button" class="btn-secondary" style="padding:0.2rem 0.5rem; font-size:0.75rem;" onclick="markAttendance('{{ emp.id }}', 'Leave')">L</button>
+          {% endif %}
+        </td>
+        <td>
+          <button type="button" class="btn-danger-sm"
+            onclick="deleteEmp('{{ emp.id }}', '{{ emp.name }}')">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-msg">No employees yet. Add your first one!</p>
+  {% endif %}
+</div>
+
+<!-- HIDDEN DELETE FORM -->
+<form id="deleteEmpForm" method="POST" style="display:none">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="delete"/>
+  <input type="hidden" name="emp_id" id="deleteEmpId"/>
+</form>
+
+<!-- HIDDEN ATTENDANCE FORM -->
+<form id="attendanceForm" method="POST" style="display:none">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="mark_attendance"/>
+  <input type="hidden" name="emp_id" id="attEmpId"/>
+  <input type="hidden" name="status" id="attStatus"/>
+</form>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addEmpModal">
+  <div class="modal">
+    <h2 class="modal-title">Add Employee</h2>
+    <form method="POST" class="modal-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add"/>
+      <input class="modal-input" type="text" name="name" placeholder="Full Name" required/>
+      <input class="modal-input" type="email" name="email" placeholder="Email Address" required/>
+      <input class="modal-input" type="text" name="role" placeholder="Role / Designation" required/>
+      <select class="modal-input" name="department">
+        <option>Engineering</option><option>Sales</option><option>HR</option>
+        <option>Finance</option><option>Operations</option><option>Marketing</option>
+      </select>
+      <input class="modal-input" type="number" name="salary" placeholder="Salary (₹)" required/>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('addEmpModal')">Cancel</button>
+        <button type="submit" class="btn-primary">Add Employee</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function deleteEmp(id, name) {
+  if (confirm('Delete employee: ' + name + '?')) {
+    document.getElementById('deleteEmpId').value = id;
+    document.getElementById('deleteEmpForm').submit();
+  }
+}
+
+function markAttendance(empId, status) {
+  document.getElementById('attEmpId').value = empId;
+  document.getElementById('attStatus').value = status;
+  document.getElementById('attendanceForm').submit();
+}
+</script>
+{% endblock %}
