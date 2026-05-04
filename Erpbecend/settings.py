@@ -67,7 +67,7 @@ DATABASES = {
         'ENGINE': 'django_mongodb_backend',
         'NAME': 'ERP',
         'CLIENT': {
-            'host': os.environ.get('MONGODB_URI', 'mongodb://localhost:27017/'),
+            'host': os.environ.get('MONGODB_URI', 'mongodb+srv://patelvishal420840_db_user:1juPVm7U7PLRMKrQ@cluster0.6teumbx.mongodb.net/?appName=Cluster0'),
         }
     }
 }
