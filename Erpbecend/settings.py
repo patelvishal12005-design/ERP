@@ -66,9 +66,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_backend',
         'NAME': 'ERP',
-        'CLIENT': {
-            'host': 'mongodb://patelvishal420840_db_user:1juPVm7U7PLRMKrQ@ac-m7bbtxg-shard-00-00.6teumbx.mongodb.net:27017,ac-m7bbtxg-shard-00-01.6teumbx.mongodb.net:27017,ac-m7bbtxg-shard-00-02.6teumbx.mongodb.net:27017/ERP?replicaSet=atlas-m7bbtxg-shard-0&ssl=true&authSource=admin',
-        }
+        'HOST': 'mongodb://patelvishal420840_db_user:1juPVm7U7PLRMKrQ@ac-m7bbtxg-shard-00-00.6teumbx.mongodb.net:27017,ac-m7bbtxg-shard-00-01.6teumbx.mongodb.net:27017,ac-m7bbtxg-shard-00-02.6teumbx.mongodb.net:27017/ERP?replicaSet=atlas-m7bbtxg-shard-0&ssl=true&authSource=admin',
     }
 }
 
