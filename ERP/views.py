@@ -108,7 +108,8 @@ class SaleViewSet(viewsets.ModelViewSet):
                 
                 data = request.data.copy()
                 data['product_name'] = inventory_item.name
-                data['unit_price'] = inventory_item.unit_price
+                if not data.get('unit_price'):
+                    data['unit_price'] = inventory_item.unit_price
                 
                 serializer = self.get_serializer(data=data)
                 serializer.is_valid(raise_exception=True)
